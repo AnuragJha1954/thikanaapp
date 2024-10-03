@@ -341,8 +341,6 @@ def get_family_members(request, user_id):
                 "education": member.education,
                 "mobile": member.mobile,
                 "date_of_birth": member.date_of_birth,
-                "isVerified": member.isVerified,
-                "isRejected": member.isRejected,
                 "profile_picture": member.profile_picture.url if member.profile_picture else None,
             }
             for member in family_members
