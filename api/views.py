@@ -56,6 +56,7 @@ def user_login(request):
                     "gender": user.gender,
                     "education": user.education,
                     "date_of_birth": user.date_of_birth,
+                    "relationship_status": user.relationship_status,
                     "verified": user.isVerified,
                     "rejected": user.isRejected,
                     "profile_picture": request.build_absolute_uri(user.profile_picture.url) if user.profile_picture else None
@@ -155,6 +156,7 @@ def user_signup(request):
                             "gender": user.gender,
                             "education": user.education,
                             "date_of_birth": user.date_of_birth,
+                            "relationship_status": user.relationship_status,
                             "verified": user.isVerified,
                             "rejected": user.isRejected,
                             "profile_picture": request.build_absolute_uri(user.profile_picture.url) if user.profile_picture else None
@@ -334,6 +336,7 @@ def get_family_members(request, user_id):
         # Serialize the family member data
         family_member_data = [
             {
+                "member_id": member.id,
                 "full_name": member.full_name,
                 "address": member.address,
                 "thikana": member.thikana,
@@ -341,6 +344,7 @@ def get_family_members(request, user_id):
                 "education": member.education,
                 "mobile": member.mobile,
                 "date_of_birth": member.date_of_birth,
+                "relationship_status": member.relationship_status,
                 "profile_picture": member.profile_picture.url if member.profile_picture else None,
             }
             for member in family_members

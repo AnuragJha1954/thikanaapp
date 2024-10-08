@@ -114,6 +114,7 @@ class CustomUserSignupSerializer(serializers.ModelSerializer):
             gender=validated_data['gender'],
             education=validated_data['education'],
             date_of_birth=validated_data['date_of_birth'],
+            relationship_status=validated_data['relationship_status'],
             profile_picture=validated_data.get('profile_picture', None)
         )
 
@@ -130,7 +131,7 @@ class CustomUserSignupSerializer(serializers.ModelSerializer):
 class FamilyMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = FamilyMembers
-        fields = ['full_name', 'address', 'thikana', 'gender', 'education', 'mobile', 'date_of_birth', 'profile_picture']
+        fields = ['full_name', 'address', 'thikana', 'gender', 'education', 'mobile', 'date_of_birth', 'profile_picture','relationship_status']
         
         
 
@@ -140,4 +141,4 @@ class FamilyMemberSerializer(serializers.ModelSerializer):
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'full_name', 'email', 'mobile', 'address', 'gender', 'education', 'mobile', 'date_of_birth', 'isVerified', 'isRejected', 'profile_picture']
+        fields = ['id', 'full_name', 'email', 'mobile', 'address', 'gender', 'education', 'mobile', 'date_of_birth', 'isVerified', 'isRejected', 'profile_picture','relationship_status']
