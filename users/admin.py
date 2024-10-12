@@ -7,7 +7,7 @@ class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'email', 'full_name', 'mobile', 'isVerified', 'isRejected', 'is_staff')
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal Info', {'fields': ('full_name', 'email', 'mobile', 'address', 'thikana', 'gender', 'education', 'date_of_birth', 'profile_picture')}),
+        ('Personal Info', {'fields': ('full_name', 'email', 'mobile', 'address', 'thikana', 'gender', 'education', 'date_of_birth', 'profile_picture','pincode','relationship_status')}),
         ('Permissions', {'fields': ('is_active', 'isVerified', 'isRejected', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )

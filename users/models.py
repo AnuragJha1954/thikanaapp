@@ -11,6 +11,12 @@ class CustomUser(AbstractUser):
         ('separated', 'Separated'),
     ]
     
+    PINCODE_CHOICES = [
+        ('458441', 'Neemuch'),
+        ('458220', 'Jawad'),
+        ('458110', 'Manasa'),
+    ]
+    
     full_name = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
     thikana = models.CharField(max_length=255)
@@ -25,6 +31,11 @@ class CustomUser(AbstractUser):
         max_length=10,
         choices=RELATIONSHIP_STATUS_CHOICES,
         default='single',
+    )
+    pincode = models.CharField(
+        max_length=6,
+        choices=PINCODE_CHOICES,
+        default='458441',
     )
 
     def __str__(self):

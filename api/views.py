@@ -57,6 +57,7 @@ def user_login(request):
                     "education": user.education,
                     "date_of_birth": user.date_of_birth,
                     "relationship_status": user.relationship_status,
+                    "pincode": user.pincode,
                     "verified": user.isVerified,
                     "rejected": user.isRejected,
                     "profile_picture": request.build_absolute_uri(user.profile_picture.url) if user.profile_picture else None
@@ -157,6 +158,7 @@ def user_signup(request):
                             "education": user.education,
                             "date_of_birth": user.date_of_birth,
                             "relationship_status": user.relationship_status,
+                            "pincode": user.pincode,
                             "verified": user.isVerified,
                             "rejected": user.isRejected,
                             "profile_picture": request.build_absolute_uri(user.profile_picture.url) if user.profile_picture else None

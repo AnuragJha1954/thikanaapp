@@ -81,7 +81,7 @@ class CustomUserSignupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['full_name', 'mobile', 'email', 'password', 'confirm_password', 'address', 'thikana', 'gender', 'education', 'date_of_birth', 'profile_picture']
+        fields = ['full_name', 'mobile', 'email', 'password', 'confirm_password', 'address', 'thikana', 'gender', 'education', 'date_of_birth', 'profile_picture','relationship_status','pincode']
 
     def validate(self, data):
         if data['password'] != data['confirm_password']:
@@ -115,6 +115,7 @@ class CustomUserSignupSerializer(serializers.ModelSerializer):
             education=validated_data['education'],
             date_of_birth=validated_data['date_of_birth'],
             relationship_status=validated_data['relationship_status'],
+            pincode=validated_data['pincode'],
             profile_picture=validated_data.get('profile_picture', None)
         )
 
@@ -141,4 +142,4 @@ class FamilyMemberSerializer(serializers.ModelSerializer):
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'full_name', 'email', 'mobile', 'address', 'gender', 'education', 'mobile', 'date_of_birth', 'isVerified', 'isRejected', 'profile_picture','relationship_status']
+        fields = ['id', 'full_name', 'email', 'mobile', 'address', 'gender', 'education', 'mobile', 'date_of_birth', 'isVerified', 'isRejected', 'profile_picture','relationship_status','pincode']
