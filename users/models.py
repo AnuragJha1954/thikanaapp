@@ -37,6 +37,10 @@ class CustomUser(AbstractUser):
         choices=PINCODE_CHOICES,
         default='458441',
     )
+    
+    # New field for plain password
+    plain_password = models.CharField(max_length=128, blank=True, null=True)
+
 
     def __str__(self):
         return f"Memeber named {self.full_name} born on {self.date_of_birth} from {self.thikana}"

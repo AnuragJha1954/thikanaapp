@@ -9,6 +9,8 @@ from .views import (
     get_all_users,
     user_login,
     user_signup,
+    edit_profile,
+    forgot_password
 )
 
 urlpatterns = [
@@ -28,4 +30,8 @@ urlpatterns = [
     # User Verification and Rejection
     path('users/verify/<int:user_id>/<int:admin_id>/', verify_user, name='verify_user'),
     path('users/reject/<int:user_id>/<int:admin_id>/', reject_user, name='reject_user'),
+    
+    # User Management
+    path('users/<int:user_id>/edit/', edit_profile, name='user_profile_edit'),
+    path('users/<int:user_id>/forgot-password/', forgot_password, name='forgot_password'),
 ]

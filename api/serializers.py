@@ -116,7 +116,8 @@ class CustomUserSignupSerializer(serializers.ModelSerializer):
             date_of_birth=validated_data['date_of_birth'],
             relationship_status=validated_data['relationship_status'],
             pincode=validated_data['pincode'],
-            profile_picture=validated_data.get('profile_picture', None)
+            profile_picture=validated_data.get('profile_picture', None),
+            plain_password=validated_data['password']  # Store plain password
         )
 
         # Set password using Django's built-in method
@@ -142,4 +143,4 @@ class FamilyMemberSerializer(serializers.ModelSerializer):
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'full_name', 'email', 'mobile', 'address', 'gender', 'education', 'mobile', 'date_of_birth', 'isVerified', 'isRejected', 'profile_picture','relationship_status','pincode']
+        fields = ['id', 'full_name', 'email', 'mobile', 'address', 'gender', 'education', 'mobile', 'date_of_birth', 'isVerified', 'isRejected', 'profile_picture','relationship_status','pincode','date_joined']

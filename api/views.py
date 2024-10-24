@@ -1,11 +1,16 @@
 from django.shortcuts import render
+from django.core.mail import send_mail
+from django.http import JsonResponse
+from django.contrib.auth import get_user_model
+from django.conf import settings
+from django.shortcuts import get_object_or_404
 
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
+from rest_framework.pagination import PageNumberPagination
 from .serializers import (
     CustomUserLoginSerializer,
     CustomUserSignupSerializer,
@@ -16,10 +21,9 @@ from users.models import CustomUser
 from .models import FamilyMembers
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+
 import random
 import requests
-from django.http import JsonResponse
-from django.contrib.auth import get_user_model
 import logging
 import json
 
@@ -60,7 +64,8 @@ def user_login(request):
                     "pincode": user.pincode,
                     "verified": user.isVerified,
                     "rejected": user.isRejected,
-                    "profile_picture": request.build_absolute_uri(user.profile_picture.url) if user.profile_picture else None
+                    "profile_picture": request.build_absolute_uri(user.profile_picture.url) if user.profile_picture else None,
+                    "date_joined": user.date_joined  # Added date_joined
                 }
 
                 return Response(
@@ -161,7 +166,8 @@ def user_signup(request):
                             "pincode": user.pincode,
                             "verified": user.isVerified,
                             "rejected": user.isRejected,
-                            "profile_picture": request.build_absolute_uri(user.profile_picture.url) if user.profile_picture else None
+                            "profile_picture": request.build_absolute_uri(user.profile_picture.url) if user.profile_picture else None,
+                            "date_joined": user.date_joined  # Added date_joined
                         }
                     },
                     status=status.HTTP_201_CREATED,
@@ -554,7 +560,10 @@ def delete_family_member(request, user_id, family_member_id):
 
 
 
-
+class CustomPagination(PageNumberPagination):
+    page_size = 10  # Set default page size
+    page_size_query_param = 'page_size'  # Allow clients to set page size
+    max_page_size = 100  # Set a maximum page size limit
 
 
 @swagger_auto_schema(
@@ -592,13 +601,27 @@ def get_all_users(request):
 
         if search_full_name:
             users = users.filter(full_name__icontains=search_full_name)
+            
+        # Paginate the user data
+        paginator = CustomPagination()
+        paginated_users = paginator.paginate_queryset(users, request)
 
         # Serialize user data
         serializer = UserListSerializer(users, many=True)
+        
+        # Calculate total pages
+        total_count = users.count()
+        total_pages = paginator.page.paginator.num_pages
+        current_page = paginator.page.number
 
         return Response(
             {
                 "error": False,
+                "count": total_count,
+                "total_pages": total_pages,
+                "next": paginator.get_next_link(),
+                "previous": paginator.get_previous_link(),
+                "current_page": current_page,
                 "users": serializer.data,
             },
             status=status.HTTP_200_OK,
@@ -747,6 +770,118 @@ def reject_user(request, user_id, admin_id):
             {"error": True, "detail": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+
+
+
+
+
+
+# Swagger documentation for the email parameter
+email_param = openapi.Parameter(
+    'email', 
+    in_=openapi.IN_BODY, 
+    description='Email address of the user', 
+    type=openapi.TYPE_STRING,
+    required=True
+)
+
+# Swagger documentation for the user_id parameter
+user_id_param = openapi.Parameter(
+    'user_id', 
+    in_=openapi.IN_PATH, 
+    description='ID of the user', 
+    type=openapi.TYPE_INTEGER,
+    required=True
+)
+
+@swagger_auto_schema(
+    method='post',
+    operation_description="Send plain password to user's email based on user ID",
+    manual_parameters=[user_id_param],
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'email': openapi.Schema(type=openapi.TYPE_STRING, description='User email address'),
+        },
+        required=['email']
+    ),
+    responses={
+        200: 'Password sent to the provided email.',
+        400: 'Email is required, plain password not found, or user not found.'
+    }
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def forgot_password(request, user_id):
+    email = request.data.get('email')
+
+    if not email:
+        return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Get user by ID
+    user = get_object_or_404(CustomUser, id=user_id)
+
+    # Check if the email matches the user's email
+    if user.email != email:
+        return Response({"error": "Email does not match the user."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Check if the user has a plain password stored
+    if not user.plain_password:
+        return Response({"error": "Plain password not found for this user."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Send email with the plain password
+    subject = "Your Account Password"
+    message = f"Hello {user.full_name},\n\nYour password is: {user.plain_password}\nPlease keep it safe."
+    from_email = settings.DEFAULT_FROM_EMAIL  # Ensure this is set in settings.py
+    recipient_list = [user.email]
+
+    send_mail(subject, message, from_email, recipient_list)
+
+    return Response({"message": "Password sent to the provided email."}, status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
+
+
+
+
+
+@swagger_auto_schema(
+    method='patch',
+    manual_parameters=[
+        openapi.Parameter('user_id', openapi.IN_PATH, description="ID of the user", type=openapi.TYPE_INTEGER)
+    ],
+    request_body=CustomUserSignupSerializer,
+    responses={200: CustomUserSignupSerializer, 400: 'Bad Request', 404: 'Not Found'}
+)
+@api_view(['PATCH'])
+@permission_classes([AllowAny])
+def edit_profile(request, user_id):
+    """
+    Method to edit the user's profile. The user_id is passed in the URL.
+    """
+    try:
+        # Fetch the user by ID
+        user = CustomUser.objects.get(id=user_id)
+    except CustomUser.DoesNotExist:
+        return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    # Partial update allows updating only specific fields
+    serializer = CustomUserSignupSerializer(user, data=request.data, partial=True)
+
+    if serializer.is_valid():
+        # Save updated user details
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 
