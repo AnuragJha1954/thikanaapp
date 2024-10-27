@@ -786,19 +786,9 @@ email_param = openapi.Parameter(
     required=True
 )
 
-# Swagger documentation for the user_id parameter
-user_id_param = openapi.Parameter(
-    'user_id', 
-    in_=openapi.IN_PATH, 
-    description='ID of the user', 
-    type=openapi.TYPE_INTEGER,
-    required=True
-)
-
 @swagger_auto_schema(
     method='post',
     operation_description="Send plain password to user's email based on user ID",
-    manual_parameters=[user_id_param],
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
         properties={
@@ -813,18 +803,14 @@ user_id_param = openapi.Parameter(
 )
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def forgot_password(request, user_id):
+def forgot_password(request):
     email = request.data.get('email')
 
     if not email:
         return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Get user by ID
-    user = get_object_or_404(CustomUser, id=user_id)
-
-    # Check if the email matches the user's email
-    if user.email != email:
-        return Response({"error": "Email does not match the user."}, status=status.HTTP_400_BAD_REQUEST)
+    # Get user by email
+    user = get_object_or_404(CustomUser, email=email)
 
     # Check if the user has a plain password stored
     if not user.plain_password:

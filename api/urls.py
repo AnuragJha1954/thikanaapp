@@ -33,5 +33,5 @@ urlpatterns = [
     
     # User Management
     path('users/<int:user_id>/edit/', edit_profile, name='user_profile_edit'),
-    path('users/<int:user_id>/forgot-password/', forgot_password, name='forgot_password'),
+    path('users/forgot-password/', forgot_password, name='forgot_password'),
 ]
